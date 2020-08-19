@@ -87,8 +87,8 @@ def load_financial_data(start_date, end_date, output_file):
     return df
 
 
-EURUSD_data = load_financial_data(start_date='2001-01-01',
-                                end_date='2018-01-01',
+EURUSD_data = load_financial_data(start_date='2003-01-01',
+                                end_date='2020-01-01',
                                 output_file='EURUSD_data.pkl')
 
 
