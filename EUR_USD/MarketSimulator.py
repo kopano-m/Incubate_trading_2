@@ -31,6 +31,21 @@ class MarketSimulator:
         else:
             print('simulation mode')
 
+    def fill_all_orders(self, ratio=100):
+        orders_to_be_removed = []
+        for index, order in enumerate(self.orders):
+            if randrange(100) <= ratio:
+                order['status'] = 'filled'
+            else:
+                order['status'] = 'cancelled'
+            orders_to_be_removed.append(index)
+            if self.gw_2_om is not None:
+                self.gw_2_om.append(order.copy())
+            else:
+                print('simulation mode')
+        for i in sorted(orders_to_be_removed, reverse=True):
+            del(self.orders[i])
+
     def handle_order(self, order):
         """
         Accepts any new order.
@@ -46,6 +61,7 @@ class MarketSimulator:
                 self.orders.append(order)
                 if self.gw_2_om is not None:
                     self.gw_2_om.append(order.copy())
+                    self.fill_all_orders(100)
                 else:
                     print('simulation mode')
                 return
@@ -58,7 +74,7 @@ class MarketSimulator:
                 return
         elif o is not None:
             if order['action'] == 'New':
-                print('Duplication order - Rejection')
+                print('Duplicate order id - Rejection')
                 return
             elif order['action'] == 'Cancel':
                 o['status'] = 'cancelled'
@@ -69,24 +85,9 @@ class MarketSimulator:
                 del (self.orders[offset])
                 print('Order cancelled')
             elif order['action'] == 'Amend':
-                o['status'] = 'accepted'
-                if self.gw_2_om is not None:
-                    self.gw_2_om.append(o.copy())
-                else:
-                    print('simulation mode')
-                print('Order amended')
-
-    def fill_all_orders(self, ratio=100):
-        orders_to_be_removed = []
-        for index, order in enumerate(self.orders):
-            if randrange(100) <= ratio:
-                order['status'] = 'filled'
-            else:
-                order['status'] = 'cancelled'
-            orders_to_be_removed.append(index)
-            if self.gw_2_om is not None:
-                self.gw_2_om.append(order.copy())
-            else:
-                print('simulation mode')
-        for i in sorted(orders_to_be_removed, reverse=True):
-            del(self.orders[i])
+               o['status'] = 'accepted'
+               if self.gw_2_om is not None:
+                   self.gw_2_om.append(o.copy())
+               else:
+                   print('simulation mode')
+               print('Order amended')

@@ -6,7 +6,8 @@ class OrderManager:
     of the overall positions and PnL.
     Uses 2 inputs and 2 outputs.
     """
-    def __init__(self, ts_2_om = None, om_2_ts = None, om_2_gw = None, gw_2_om = None):
+    def __init__(self, ts_2_om=None, om_2_ts=None,
+                 om_2_gw=None, gw_2_om=None):
         self.orders = []
         self.order_id = 0
         self.ts_2_om = ts_2_om
@@ -14,15 +15,40 @@ class OrderManager:
         self.gw_2_om = gw_2_om
         self.om_2_ts = om_2_ts
 
+    def check_order_valid(self, order):
+        """
+        Performs regular checks on an order.
+        """
+        if order['quantity'] < 0:
+            return False
+        if order['price'] < 0:
+            return False
+        return True
+
+    def create_new_order(self, order):
+        """
+        Create a dictionary to store the order characteristics.
+        """
+        self.order_id += 1
+        neworder = {
+            'id': self.order_id,
+            'price': order['price'],
+            'quantity': order['quantity'],
+            'side': order['side'],
+            'status': 'new',
+            'action': 'New'
+        }
+        return neworder
+
     def handle_input_from_ts(self):
         """
         Checks whether the ts_2_om channel has been created.
         """
-        if self.ts_2_om is None:
+        if self.ts_2_om is not None:
             if len(self.ts_2_om) > 0:
                 self.handle_order_from_trading_strategy(self.ts_2_om.popleft())
-            else:
-                print('simulation mode')
+        else:
+            print('simulation mode')
 
     def handle_order_from_trading_strategy(self, order):
         """
@@ -35,6 +61,27 @@ class OrderManager:
                 print('simulation mode')
             else:
                 self.om_2_gw.append(order.copy())
+
+    def lookup_order_by_id(self, id):
+        """
+        Returns a reference to the order by looking up by order ID.
+        """
+        for i in range(len(self.orders)):
+            if self.orders[i]['id'] == id:
+                return self.orders[i]
+        return None
+
+    def clean_traded_orders(self):
+        """
+        Removes the list of orders all the orders that have been fiiled.
+        """
+        order_offsets = []
+        for k in range(len(self.orders)):
+            if self.orders[k]['status'] == 'filled':
+                order_offsets.append(k)
+        if len(order_offsets):
+            for k in sorted(order_offsets, reverse=True):
+                del (self.orders[k])
 
     def handle_input_from_market(self):
         """
@@ -59,51 +106,3 @@ class OrderManager:
             self.clean_traded_orders()
         else:
             print('order not found')
-
-    def check_order_valid(self, order):
-        """
-        Performs regular checks on an order.
-        """
-        if order['quantity'] < 0:
-            return False
-        if order['price'] < 0:
-            return False
-        return True
-
-    # create an order based on the order sent by 
-    # the trading strategy, which has a unique (local) order ID
-    def create_new_order(self, order):
-        """
-        Create a dictionary to store the order characteristics.
-        """
-        self.order_id += 1
-        neworder = {
-            'id': self.order_id,
-            'price': order['price'],
-            'quantity': order['quantity'],
-            'side': order['side'],
-            'status': 'new',
-            'action': 'New'
-        }
-        return neworder
-
-    def lookup_order_by_id(self, id):
-        """
-        Returns a reference to the order by looking up by order ID.
-        """
-        for i in range(len(self.orders)):
-            if self.orders[i]['id'] == id:
-                return self.orders[i]
-        return None
-
-    def clean_traded_orders(self):
-        """
-        Removes the list of orders all the orders that have been fiiled.
-        """
-        order_offsets = []
-        for k in range(len(self.orders)):
-            if self.orders[k]['status'] == 'filled':
-                order_offsets.append(k)
-        if len(order_offsets):
-            for k in sorted(order_offsets, reverse=True):
-                del (self.orders[k])
