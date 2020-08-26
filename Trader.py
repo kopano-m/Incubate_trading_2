@@ -7,7 +7,7 @@ import sys
 
 import backtrader as bt
 
-from strategies.tst import TestStrategy
+from strategies.tests import TestStrategy
 
 if __name__ == "__main__":
     cerebro = bt.Cerebro()
