@@ -7,4 +7,8 @@ A basic trading system
 ```python
 python Trader.py
 ```
-
+Terminal Output
+![Output](img/TestStrategy2.png)
+![Output](img/TestStrategy3.png)
+Output plot
+![Output](img/TestStrategy.png)
